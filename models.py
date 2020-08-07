@@ -293,3 +293,91 @@ class SACN(torch.nn.Module):
 
 
 
+# SUHI.
+class SUHI(torch.nn.Module):
+    def __init__(self, num_entities, num_relations):
+        super(SUHI, self).__init__()
+
+        self.emb_e_source = torch.nn.Embedding(num_entities, Config.init_emb_size, padding_idx=0)
+        self.emb_e_target = torch.nn.Embedding(num_entities, Config.init_emb_size, padding_idx=0)
+        self.gc1 = GraphConvolution(Config.init_emb_size, Config.gc1_emb_size, num_relations)
+        self.gc2 = GraphConvolution(Config.gc1_emb_size, Config.embedding_dim, num_relations)
+        self.emb_rel = torch.nn.Embedding(num_relations, Config.embedding_dim, padding_idx=0)
+        self.inp_drop = torch.nn.Dropout(Config.input_dropout)
+        self.hidden_drop = torch.nn.Dropout(Config.dropout_rate)
+        self.feature_map_drop = torch.nn.Dropout(Config.dropout_rate)
+        self.loss = torch.nn.BCELoss()
+        self.conv1 =  nn.Conv1d(2, Config.channels, Config.kernel_size, stride=1, padding= int(math.floor(Config.kernel_size/2))) # kernel size is odd, then padding = math.floor(kernel_size/2)
+        self.bn0 = torch.nn.BatchNorm1d(2)
+        self.bn1 = torch.nn.BatchNorm1d(Config.channels)
+        self.bn2 = torch.nn.BatchNorm1d(Config.embedding_dim)
+        self.register_parameter('b', Parameter(torch.zeros(num_entities)))
+        self.fc = torch.nn.Linear(Config.embedding_dim*Config.channels,Config.embedding_dim)
+        self.bn3 = torch.nn.BatchNorm1d(Config.gc1_emb_size)
+        self.bn4 = torch.nn.BatchNorm1d(Config.embedding_dim)
+        self.bn_init = torch.nn.BatchNorm1d(Config.init_emb_size)
+
+        print(num_entities, num_relations)
+
+    def init(self):
+        xavier_normal_(self.emb_e.weight.data)
+        xavier_normal_(self.emb_rel.weight.data)
+        xavier_normal_(self.gc1.weight.data)
+        xavier_normal_(self.gc2.weight.data)
+
+    def forward(self, e1, rel, X, A):
+
+        emb_initial_source = self.emb_e_source(X)
+        emb_initial_target = self.emb_e_source(X)
+        x_source = self.gc1(emb_initial_source, A)
+        x_target = self.gc1(emb_initial_target, A)
+        x_source = self.bn3(x_source)
+        x_target = self.bn3(x_target)
+        x_source = F.tanh(x_source)
+        x_target = F.tanh(x_target)
+        x_source = F.dropout(x_source, Config.dropout_rate, training=self.training)
+        x_target = F.dropout(x_target, Config.dropout_rate, training=self.training)
+
+        x_source = self.bn4(self.gc2(x_source, A))
+        x_target = self.bn4(self.gc2(x_target, A))
+        e1_embedded_all_source = F.tanh(x_source)
+        e1_embedded_all_target = F.tanh(x_target)
+        e1_embedded_all_source = F.dropout(e1_embedded_all_source, Config.dropout_rate, training=self.training)
+        e1_embedded_all_target = F.dropout(e1_embedded_all_target, Config.dropout_rate, training=self.training)
+        e1_embedded_source = e1_embedded_all_source[e1]
+        e1_embedded_target = e1_embedded_all_target[e1]
+        rel_embedded = self.emb_rel(rel)
+        stacked_inputs_source = torch.cat([e1_embedded_source, rel_embedded], 1)
+        stacked_inputs_target = torch.cat([e1_embedded_target, rel_embedded], 1)
+        stacked_inputs_source = self.bn0(stacked_inputs_source)
+        stacked_inputs_target = self.bn0(stacked_inputs_target)
+        x_source= self.inp_drop(stacked_inputs_source)
+        x_target= self.inp_drop(stacked_inputs_target)
+        x_source= self.conv1(x_source)
+        x_target= self.conv1(x_target)
+        x_source= self.bn1(x_source)
+        x_target= self.bn1(x_target)
+        x_source= F.relu(x_source)
+        x_target= F.relu(x_target)
+        x_source = self.feature_map_drop(x_source)
+        x_target = self.feature_map_drop(x_target)
+        x_source = x_source.view(Config.batch_size, -1)
+        x_target = x_target.view(Config.batch_size, -1)
+        x_source = self.fc(x_source)
+        x_target = self.fc(x_target)
+        x_source = self.hidden_drop(x_source)
+        x_target = self.hidden_drop(x_target)
+        x_source = self.bn2(x_source)
+        x_target = self.bn2(x_target)
+        x_source = F.relu(x_source)
+        x_target = F.relu(x_target)
+        x_source = torch.mm(x_source, e1_embedded_all_target.transpose(1, 0))
+        # x_target = torch.mm(x_target, e1_embedded_all_target.transpose(1, 0))
+        pred_source = F.sigmoid(x_source)
+        # pred_target = F.sigmoid(x_target)
+
+        return pred_source
+
+
+
+

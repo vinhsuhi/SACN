@@ -11,7 +11,7 @@ from os.path import join
 import torch.backends.cudnn as cudnn
 
 from evaluation import ranking_and_hits
-from models import SACN, ConvTransE, ConvE, DistMult, Complex
+from models import SACN, ConvTransE, ConvE, DistMult, Complex, SUHI
 
 from src.spodernet.spodernet.preprocessing.pipeline import Pipeline, DatasetStreamer
 from src.spodernet.spodernet.preprocessing.processors import JsonLoaderProcessors, Tokenizer, AddToVocab, SaveLengthsToState, StreamToHDF5, SaveMaxLengthsToState, CustomTokenizer
@@ -167,6 +167,8 @@ def main():
         model = ConvE(vocab['e1'].num_token, vocab['rel'].num_token)
     elif Config.model_name == 'SACN':
         model = SACN(vocab['e1'].num_token, vocab['rel'].num_token)
+    elif Config.model_name == 'SUHI':
+        model = SACN(vocab['e1'].num_token, vocab['rel'].num_token)
     elif Config.model_name == 'ConvTransE':
         model = ConvTransE(vocab['e1'].num_token, vocab['rel'].num_token)
     elif Config.model_name == 'ConvE':
@@ -195,21 +197,22 @@ def main():
         X = X.cuda()
 
 
-    if load:
-        model_params = torch.load(model_path)
-        print(model)
-        total_param_size = []
-        params = [(key, value.size(), value.numel()) for key, value in model_params.items()]
-        for key, size, count in params:
-            total_param_size.append(count)
-            print(key, size, count)
-        print(np.array(total_param_size).sum())
-        model.load_state_dict(model_params)
-        model.eval()
-        ranking_and_hits(model, test_rank_batcher, vocab, 'test_evaluation')
-        ranking_and_hits(model, dev_rank_batcher, vocab, 'dev_evaluation')
-    else:
-        model.init()
+    # if load:
+    #     model_params = torch.load(model_path)
+    #     print(model)
+    #     total_param_size = []
+    #     params = [(key, value.size(), value.numel()) for key, value in model_params.items()]
+    #     for key, size, count in params:
+    #         total_param_size.append(count)
+    #         print(key, size, count)
+    #     print(np.array(total_param_size).sum())
+    #     model.load_state_dict(model_params)
+    #     model.eval()
+    #     # model, dev_rank_batcher, vocab, name, X, adjacencie
+    #     ranking_and_hits(model, test_rank_batcher, vocab, 'test_evaluation')
+    #     ranking_and_hits(model, dev_rank_batcher, vocab, 'dev_evaluation')
+    # else:
+    model.init()
 
     total_param_size = []
     params = [value.numel() for value in model.parameters()]
