@@ -13,11 +13,11 @@ from sklearn import metrics
 log = Logger('evaluation{0}.py.txt'.format(datetime.datetime.now()))
 
 def ranking_and_hits(model, dev_rank_batcher, vocab, name, X, adjacencies):
-    log.info('')
-    log.info('-'*50)
-    log.info(name)
-    log.info('-'*50)
-    log.info('')
+    print('')
+    print('-'*50)
+    print(name)
+    print('-'*50)
+    print('')
     hits_left = []
     hits_right = []
     hits = []
@@ -108,22 +108,22 @@ def ranking_and_hits(model, dev_rank_batcher, vocab, name, X, adjacencies):
 
     
     for i in range(10):
-        log.info('Hits left @{0}: {1}'.format(i+1, np.mean(hits_left[i])))
-        log.info('Hits right @{0}: {1}'.format(i+1, np.mean(hits_right[i])))
-        log.info('Hits @{0}: {1}'.format(i+1, np.mean(hits[i])))
-    log.info('Mean rank left: {0}', np.mean(ranks_left))
-    log.info('Mean rank right: {0}', np.mean(ranks_right))
-    log.info('Mean rank: {0}', np.mean(ranks))
-    log.info('Mean reciprocal rank left: {0}', np.mean(1./np.array(ranks_left)))
-    log.info('Mean reciprocal rank right: {0}', np.mean(1./np.array(ranks_right)))
-    log.info('Mean reciprocal rank: {0}', np.mean(1./np.array(ranks)))
+        print('Hits left @{0}: {1}'.format(i+1, np.mean(hits_left[i])))
+        print('Hits right @{0}: {1}'.format(i+1, np.mean(hits_right[i])))
+        print('Hits @{0}: {1}'.format(i+1, np.mean(hits[i])))
+    print('Mean rank left: {0}', np.mean(ranks_left))
+    print('Mean rank right: {0}', np.mean(ranks_right))
+    print('Mean rank: {0}', np.mean(ranks))
+    print('Mean reciprocal rank left: {0}', np.mean(1./np.array(ranks_left)))
+    print('Mean reciprocal rank right: {0}', np.mean(1./np.array(ranks_right)))
+    print('Mean reciprocal rank: {0}', np.mean(1./np.array(ranks)))
     
 def ranking_and_hits_pre(model, dev_rank_batcher, vocab, name, X, adjacencies):
-    log.info('')
-    log.info('-'*50)
-    log.info(name)
-    log.info('-'*50)
-    log.info('')
+    print('')
+    print('-'*50)
+    print(name)
+    print('-'*50)
+    print('')
     hits_left = []
     hits_right = []
     hits = []
@@ -200,12 +200,12 @@ def ranking_and_hits_pre(model, dev_rank_batcher, vocab, name, X, adjacencies):
         dev_rank_batcher.state.loss = [0]
 
     for i in range(10):
-        log.info('Hits left @{0}: {1}'.format(i+1, np.mean(hits_left[i])))
-        log.info('Hits right @{0}: {1}'.format(i+1, np.mean(hits_right[i])))
-        log.info('Hits @{0}: {1}'.format(i+1, np.mean(hits[i])))
-    log.info('Mean rank left: {0}', np.mean(ranks_left))
-    log.info('Mean rank right: {0}', np.mean(ranks_right))
-    log.info('Mean rank: {0}', np.mean(ranks))
-    log.info('Mean reciprocal rank left: {0}', np.mean(1./np.array(ranks_left)))
-    log.info('Mean reciprocal rank right: {0}', np.mean(1./np.array(ranks_right)))
-    log.info('Mean reciprocal rank: {0}', np.mean(1./np.array(ranks)))
+        print('Hits left @{0}: {1}'.format(i+1, np.mean(hits_left[i])))
+        print('Hits right @{0}: {1}'.format(i+1, np.mean(hits_right[i])))
+        print('Hits @{0}: {1}'.format(i+1, np.mean(hits[i])))
+    print('Mean rank left: {0}', np.mean(ranks_left))
+    print('Mean rank right: {0}', np.mean(ranks_right))
+    print('Mean rank: {0}', np.mean(ranks))
+    print('Mean reciprocal rank left: {0}', np.mean(1./np.array(ranks_left)))
+    print('Mean reciprocal rank right: {0}', np.mean(1./np.array(ranks_right)))
+    print('Mean reciprocal rank: {0}', np.mean(1./np.array(ranks)))
