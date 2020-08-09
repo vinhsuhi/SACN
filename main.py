@@ -242,8 +242,8 @@ def main():
 
         model.eval()
         with torch.no_grad():
-            ranking_and_hits(model, dev_rank_batcher, vocab, 'dev_evaluation', X, adjacencies)
-            if epoch % 3 == 0:
+            # ranking_and_hits(model, dev_rank_batcher, vocab, 'dev_evaluation', X, adjacencies)
+            if epoch % 50 == 0:
                 if epoch > 0:
                     ranking_and_hits(model, test_rank_batcher, vocab, 'test_evaluation', X, adjacencies)
 
