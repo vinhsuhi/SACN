@@ -392,14 +392,12 @@ class TransE(torch.nn.Module):
     def init(self):
         xavier_normal_(self.emb_e.weight.data)
         xavier_normal_(self.emb_rel.weight.data)
-        xavier_normal_(self.gc1.weight.data)
-        xavier_normal_(self.gc2.weight.data)
 
     def forward(self, e1, rel, e2):
         em1 = self.emb_e(e1)
         rel_emb = self.emb_rel(rel)
         em2 = self.emb_e(e2)
-        neg = torch.randint(0, self.num_entities, len(e2))
+        neg = torch.randint(0, self.num_entities, (len(e2),))
         emb_neg = self.emb_rel(neg)
         return em1, rel_emb, em2, emb_neg
 

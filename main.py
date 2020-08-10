@@ -60,7 +60,7 @@ def preprocess(dataset_name, delete_data=False):
     dev_ranking_path = 'data/{0}/e1rel_to_e2_ranking_dev.json'.format(dataset_name)
     test_ranking_path = 'data/{0}/e1rel_to_e2_ranking_test.json'.format(dataset_name)
 
-    keys2keys = {}preprocess
+    keys2keys = {}
     keys2keys['e1'] = 'e1' # entities
     keys2keys['rel'] = 'rel' # relations
     keys2keys['rel_eval'] = 'rel' # relations
