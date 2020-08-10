@@ -237,7 +237,7 @@ def main():
                 loss = model.loss(pred, e2_multi)
             else:
                 em1, rel_emb, em2, neg_emb = model.forward(e1, rel, e2)
-                loss = (em1 + rel_emb - em2) ** 2 - (emb1 + rel_emb - neg_emb) ** 2
+                loss = (em1 + rel_emb - em2) ** 2 - (em1 + rel_emb - neg_emb) ** 2
                 loss = loss.mean()
             loss.backward()
             opt.step()
@@ -254,6 +254,7 @@ def main():
             if epoch % 50 == 0:
                 if epoch > 0:
                     ranking_and_hits(model, test_rank_batcher, vocab, 'test_evaluation', X, adjacencies)
+    ranking_and_hits(model, test_rank_batcher, vocab, 'test_evaluation', X, adjacencies)
 
 
 if __name__ == '__main__':
