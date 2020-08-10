@@ -11,7 +11,7 @@ from os.path import join
 import torch.backends.cudnn as cudnn
 
 from evaluation import ranking_and_hits
-from models import SACN, ConvTransE, ConvE, DistMult, Complex, SUHI
+from models import SACN, ConvTransE, ConvE, DistMult, Complex, SUHI, TransE
 
 from src.spodernet.spodernet.preprocessing.pipeline import Pipeline, DatasetStreamer
 from src.spodernet.spodernet.preprocessing.processors import JsonLoaderProcessors, Tokenizer, AddToVocab, SaveLengthsToState, StreamToHDF5, SaveMaxLengthsToState, CustomTokenizer
@@ -60,7 +60,7 @@ def preprocess(dataset_name, delete_data=False):
     dev_ranking_path = 'data/{0}/e1rel_to_e2_ranking_dev.json'.format(dataset_name)
     test_ranking_path = 'data/{0}/e1rel_to_e2_ranking_test.json'.format(dataset_name)
 
-    keys2keys = {}
+    keys2keys = {}preprocess
     keys2keys['e1'] = 'e1' # entities
     keys2keys['rel'] = 'rel' # relations
     keys2keys['rel_eval'] = 'rel' # relations
@@ -177,6 +177,8 @@ def main():
         model = DistMult(vocab['e1'].num_token, vocab['rel'].num_token)
     elif Config.model_name == 'ComplEx':
         model = Complex(vocab['e1'].num_token, vocab['rel'].num_token)
+    elif Config.model_name == "TransE":
+        model = TransE(vocab['e1'].num_token, vocab['rel'].num_token)
     else:
         log.info('Unknown model: {0}', Config.model_name)
         raise Exception("Unknown model!")
@@ -227,10 +229,16 @@ def main():
             e1 = str2var['e1'].cuda()
             rel = str2var['rel'].cuda()
             e2_multi = str2var['e2_multi1_binary'].float().cuda()
+            e2 = str2var['e2'].cuda()
             # label smoothing
             e2_multi = ((1.0-Config.label_smoothing_epsilon)*e2_multi) + (1.0/e2_multi.size(1))
-            pred = model.forward(e1, rel, X, adjacencies)
-            loss = model.loss(pred, e2_multi)
+            if not Config.model_name == "TransE":
+                pred = model.forward(e1, rel, X, adjacencies)
+                loss = model.loss(pred, e2_multi)
+            else:
+                em1, rel_emb, em2, neg_emb = model.forward(e1, rel, e2)
+                loss = (em1 + rel_emb - em2) ** 2 - (emb1 + rel_emb - neg_emb) ** 2
+                loss = loss.mean()
             loss.backward()
             opt.step()
 
