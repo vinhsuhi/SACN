@@ -117,16 +117,9 @@ def main():
 
     train_batcher.at_batch_prepared_observers.insert(1,TargetIdx2MultiTarget(num_entities, 'e2_multi1', 'e2_multi1_binary'))
 
-
-    def normalize(mx):
-        """Row-normalize sparse matrix"""
-        rowsum = np.array(mx.sum(1))
-        r_inv = np.power(rowsum, -1).flatten()
-        r_inv[np.isinf(r_inv)] = 0.
-        r_mat_inv = sp.diags(r_inv)
-        mx = r_mat_inv.dot(mx)
-        return mx
-
+    import pdb 
+    pdb.set_trace()
+    
     data = []
     rows = []
     columns = []
@@ -151,11 +144,6 @@ def main():
     v = torch.LongTensor(data).cuda()
     adjacencies = [indices, v, num_entities]
 
-
-    #filename = join(path_dir, 'data', Config.dataset, 'adj.pkl')
-    #file = open(filename, 'wb+')
-    #pkl.dump(adjacencies, file)
-    #file.close()
 
     print('Finished the preprocessing')
 
@@ -198,22 +186,6 @@ def main():
         model.cuda()
         X = X.cuda()
 
-
-    # if load:
-    #     model_params = torch.load(model_path)
-    #     print(model)
-    #     total_param_size = []
-    #     params = [(key, value.size(), value.numel()) for key, value in model_params.items()]
-    #     for key, size, count in params:
-    #         total_param_size.append(count)
-    #         print(key, size, count)
-    #     print(np.array(total_param_size).sum())
-    #     model.load_state_dict(model_params)
-    #     model.eval()
-    #     # model, dev_rank_batcher, vocab, name, X, adjacencie
-    #     ranking_and_hits(model, test_rank_batcher, vocab, 'test_evaluation')
-    #     ranking_and_hits(model, dev_rank_batcher, vocab, 'dev_evaluation')
-    # else:
     model.init()
 
     total_param_size = []
