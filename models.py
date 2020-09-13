@@ -265,6 +265,8 @@ class SACN(torch.nn.Module):
 
         emb_initial = self.emb_e(X)
         x = self.gc1(emb_initial, A)
+        import pdb
+        pdb.set_trace()
         x = self.bn3(x)
         x = F.tanh(x)
         x = F.dropout(x, Config.dropout_rate, training=self.training)
